@@ -611,7 +611,6 @@ Vec<T,N> mixMin(const Vec<T,N>& a,const Vec<T,N>& b)
     }
     return v;
 }
-
 template<class T, int N>
 Vec<T,N> mixMax(const Vec<T,N>& a,const Vec<T,N>& b)
 {   

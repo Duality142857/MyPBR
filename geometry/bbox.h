@@ -42,3 +42,4 @@ struct BBox
     }
 };
 
+using BB3f=BBox<float,3>;

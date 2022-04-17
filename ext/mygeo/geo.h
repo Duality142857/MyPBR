@@ -25,14 +25,6 @@ Vec3f halfway(Vec3f l, Vec3f e)
 
 
 
-
-
-
-
-
-
-
-
 constexpr float toRad(float x)
 {
     return x*3.1415927/180.0;
