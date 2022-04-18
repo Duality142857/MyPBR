@@ -1,5 +1,6 @@
 #pragma once
 #include<mygeo/vec.h>
+#include"space.h"
 
 struct Ray
 {
