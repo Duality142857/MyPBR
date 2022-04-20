@@ -1,5 +1,6 @@
 #pragma once
 #include"vec.h"
+#include<concepts>
 
 namespace MyGeo{
 template<class T,int M, int N>
@@ -8,15 +9,32 @@ struct Mat;
 using Mat3f=Mat<float,3,3>;
 using Mat4f=Mat<float,4,4>;
 
+
+static Mat4f invMat(const Mat4f& m);
+
 template<class T,int M, int N>
 std::ostream& operator<<(std::ostream& ostr,const Mat<T,M,N>& m)
 {
-    for(int i=0;i!=N;i++)
+    for(int i=0;i!=M;i++)
     {
-        ostr<<m.col[i]<<std::endl;
+        for(int j=0;j!=N;j++)
+        {
+            ostr<<m(i,j)<<' ';
+        }
+        std::cout<<std::endl;
     }
+
+    // for(int i=0;i!=N;i++)
+    // {
+    //     ostr<<m.col[i]<<std::endl;
+    // }
     return ostr;
 }
+
+//determinant declaration
+template<class T,int N>
+T det(const Mat<T, N, N>& m);
+
 
 template<class T,int N>
 Mat<T,N,N> Eye()
@@ -35,6 +53,24 @@ template<class T,int M, int N>
 struct Mat
 {
     std::array<Vec<T,M>,N> col;
+
+    T determinant() const
+    {
+        static_assert(M==N);
+        //make sure T is float
+        static_assert(std::is_same<float, typename std::remove_cv<T>::type>::value);
+        return det<T,N>(*this);
+    }
+
+    const T& operator()(int i,int j) const 
+    {
+        return col[j][i];
+    }
+
+    T& operator()(int i,int j)
+    {
+        return col[j][i];
+    }
 
     Mat& operator+=(const Mat& m)
     {
@@ -92,6 +128,11 @@ struct Mat
         return m;
     }
 
+    Mat<T,N,N> inverse() const 
+    {
+        return invMat(*this);
+    }
+
     Vec<T,M> operator*(const Vec<T,N>& v) const
     {
         // std::cout<<"v: "<<v<<std::endl;
@@ -109,11 +150,101 @@ struct Mat
         // std::cout<<&(mr.col[1][1])<<std::endl;
         return mr;
     }
-    
 
     friend std::ostream& operator<<<T,M,N>(std::ostream& ostr,const Mat&);
 
+    Mat adjMat() const 
+    {
+        T det=determinant();
+        assert(det!=0);
+        Mat<T,N,N> am{}
+        
+
+    }
+
 };
+
+
+
+
+
+
+
+
+template<>
+float det<float, 2>(const Mat<float, 2, 2>& m)
+{
+    return m(0, 0) * m(1, 1) - m(1, 0) * m(0, 1);
+}
+
+
+
+#define DET3(m,r1,r2,r3,c1,c2,c3) ( m(r1, c1) * (m(r2, c2) * m(r3, c3) - m(r2, c3) * m(r3, c2))\
+        + m(r1, c2) * (m(r3, c1) * m(r2, c3) - m(r2, c1) * m(r3, c3)) \
+        + m(r1, c3) * (m(r2, c1) * m(r3, c2) - m(r2, c2) * m(r3, c1)) )
+
+template<>
+float det<float, 3>(const Mat<float, 3, 3>& m)
+{
+    return DET3(m,0,1,2,0,1,2);
+}
+
+template<>
+float det<float, 4>(const Mat<float, 4, 4>& m)
+{
+    return m(0, 0) * DET3(m, 1, 2, 3, 1, 2, 3) \
+        - m(0, 1) * DET3(m, 1, 2, 3, 0, 2, 3) \
+        + m(0, 2) * DET3(m, 1, 2, 3, 0, 1, 3) \
+        - m(0, 3) * DET3(m, 1, 2, 3, 0, 1, 2);
+}
+
+//child 3 dimensional det of 4 dimensional det, with nominated rows and columns
+template<class T, int r1,int r2,int r3,int c1,int c2,int c3>
+T DET3_4(const Mat<T,4,4>& m)
+{
+    return m(r1, c1) * (m(r2, c2) * m(r3, c3) - m(r2, c3) * m(r3, c2))\
+        + m(r1, c2) * (m(r3, c1) * m(r2, c3) - m(r2, c1) * m(r3, c3)) \
+        + m(r1, c3) * (m(r2, c1) * m(r3, c2) - m(r2, c2) * m(r3, c1));
+}
+
+#define REM0 1,2,3
+#define REM1 0,2,3
+#define REM2 0,1,3
+#define REM3 0,1,2
+#define AR(m,i,j) DET3_4<float,REM##i,REM##j>(m)
+//inverse matrix
+static Mat4f invMat(const Mat4f& m)
+{
+
+    auto recidet=1.f/m.determinant();
+    Mat4f resM;
+
+    resM(0,0)= AR(m,0,0)*recidet; 
+    resM(0,1)= -AR(m,1,0)*recidet; 
+    resM(0,2)= AR(m,2,0)*recidet; 
+    resM(0,3)= -AR(m,3,0)*recidet; 
+
+    resM(1,0)= -AR(m,0,1)*recidet; 
+    resM(1,1)= AR(m,1,1)*recidet; 
+    resM(1,2)= -AR(m,2,1)*recidet; 
+    resM(1,3)= AR(m,3,1)*recidet; 
+
+    resM(2,0)= AR(m,0,2)*recidet;
+    resM(2,1)= -AR(m,1,2)*recidet;
+    resM(2,2)= AR(m,2,2)*recidet;
+    resM(2,3)= -AR(m,3,2)*recidet;
+
+    resM(3,0)= -AR(m,0,3)*recidet;
+    resM(3,1)= AR(m,1,3)*recidet;
+    resM(3,2)= -AR(m,2,3)*recidet;
+    resM(3,3)= AR(m,3,3)*recidet;
+    
+    return resM;
+}
+
+
+
+
 
 }
 

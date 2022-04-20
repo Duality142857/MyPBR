@@ -6,7 +6,11 @@
 struct Transform 
 {
     virtual Point operator()(const Point& p) const =0;
-    // virtual Vect operator()(const Vect& v) const
+    virtual Vect operator()(const Vect& v) const = 0;
+    virtual Ray operator()(const Ray& r) const = 0;
+    virtual Normal operator()(const Normal& v) const=0;
+
+
     // Transform transpose()
     // {
     //     return {m.transpose()};
@@ -20,9 +24,16 @@ struct Transform
 struct MatrixTransform: public Transform
 {
     MyGeo::Mat4f m;
-    // MatrixTransform(const MyGeo::Mat4f& m):m{m}{}
-    MatrixTransform(const MyGeo::Mat4f& m):m{m}{}
+    MatrixTransform(const MatrixTransform& transform):m{transform.m}{}
+    
 
+    MatrixTransform inverse() const 
+    {
+        return {m.inverse()};
+    }
+
+    // MatrixTransform(const MyGeo::Mat4f& m):m{m}{}
+    MatrixTransform(const MyGeo::Mat4f& m):m{m} {}
 
     //act on Point
     virtual Point operator()(const Point& p) const
@@ -35,7 +46,28 @@ struct MatrixTransform: public Transform
     {
         return {m*v.v4};
     }
+
+    virtual Normal operator()(const Normal& v) const
+    {
+        return {m.inverse().transpose()*v.v4};
+    }
+
+    virtual Ray operator()(const Ray& r) const
+    {
+        return Ray{operator()(r.source),operator()(r.direction)};
+    }
+
+
+    MatrixTransform operator*(const MatrixTransform& other)
+    {
+        return {m*other.m};
+    }
 };
+
+static MatrixTransform translateMat(const MyGeo::Vec3f& t)
+{
+    return {MyGeo::Mat4f{MyGeo::Vec4f{1,0,0,0},{0,1,0,0},{0,0,1,0},{t,1}}};
+}
 
 static MatrixTransform scaleMat(const MyGeo::Vec3f& k)
 {
@@ -60,36 +92,41 @@ static MatrixTransform rotationMat(const MyGeo::Vec3f& axis, float angle)
             }};   
 }
 
-struct Translate : public Transform
-{
-    MyGeo::Vec4f tVec;
-    Translate(const MyGeo::Vec3f& transVec):tVec{transVec,1.f}{}
-    Translate(const MyGeo::Vec4f& transVec):tVec{transVec}{}
-    Translate(float x,float y,float z):tVec{x,y,z,1.f}{}
+// struct Translate : public Transform
+// {
+//     MyGeo::Vec4f tVec;
+//     Translate(const MyGeo::Vec3f& transVec):tVec{transVec,1.f}{}
+//     Translate(const MyGeo::Vec4f& transVec):tVec{transVec}{}
+//     Translate(float x,float y,float z):tVec{x,y,z,1.f}{}
 
 
-    //act on Point, pure translation does nothing on vector
-    virtual Point operator()(const Point& p) const override
-    {
-        return Point{p.v3+tVec.head};
-    }
+//     //act on Point, pure translation does nothing on vector
+//     virtual Point operator()(const Point& p) const override
+//     {
+//         return Point{p.v3+tVec.head};
+//     }
+
+//     virtual Vect operator()(const Vect& v) const override
+//     {
+//         return v;
+//     }
     
-    friend Translate operator*(const Translate& t1 ,const Translate& t2)    
-    {
-        return Translate{t1.tVec+t2.tVec};
-    }
+//     friend Translate operator*(const Translate& t1 ,const Translate& t2)    
+//     {
+//         return Translate{t1.tVec+t2.tVec};
+//     }
 
-    //rotate, then translate
-    friend MatrixTransform operator*(const Translate& tl, const MatrixTransform& tm)
-    {
-        auto res=tm;
-        res.m.col[3]+=tl.tVec;
-        return res;
-    }
+//     //rotate, then translate
+//     friend MatrixTransform operator*(const Translate& tl, const MatrixTransform& tm)
+//     {
+//         auto res=tm;
+//         res.m.col[3]+=tl.tVec;
+//         return res;
+//     }
 
-    friend MatrixTransform operator*(const MatrixTransform& tm, const Translate& tl)
-    {   
-        MyGeo::Mat4f transMat{MyGeo::Vec4f{1,0,0,0},MyGeo::Vec4f{1,0,0,0},MyGeo::Vec4f{1,0,0,0},tl.tVec};
-        return {tm.m*transMat};
-    }
-};
+//     friend MatrixTransform operator*(const MatrixTransform& tm, const Translate& tl)
+//     {   
+//         MyGeo::Mat4f transMat{MyGeo::Vec4f{1,0,0,0},MyGeo::Vec4f{1,0,0,0},MyGeo::Vec4f{1,0,0,0},tl.tVec};
+//         return {tm.m*transMat};
+//     }
+// };
