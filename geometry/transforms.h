@@ -38,7 +38,10 @@ struct MatrixTransform: public Transform
     //act on Point
     virtual Point operator()(const Point& p) const
     {
-        return {m*p.v4};
+        Point res{m*p.v4};
+        float reciw=1.f/res.w;
+        res.v3*=reciw;
+        return res;
     }
 
     //act on Vector
@@ -54,6 +57,7 @@ struct MatrixTransform: public Transform
 
     virtual Ray operator()(const Ray& r) const
     {
+        std::cout<<"transfrom ray"<<std::endl;
         return Ray{operator()(r.source),operator()(r.direction)};
     }
 

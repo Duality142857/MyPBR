@@ -20,6 +20,8 @@ struct Shape : public Object
     // virtual bool hit(const Ray& ray, HitRecord& rec) const =0;
 };
 
+
+
 struct Sphere: Shape
 {
     const float radius,radius2;

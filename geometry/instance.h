@@ -18,5 +18,4 @@ struct Instance: public Object
         return flag;
     }
     
-    
 };

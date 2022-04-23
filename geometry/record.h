@@ -8,11 +8,15 @@ struct HitRecord
     float tmin=0.f;
     float tmax=std::numeric_limits<float>::max();
     Point position;
-    Vect normal;
+    Normal normal;
     void transform(const MatrixTransform& transform)
     {
         position=transform(position);
         normal=transform(normal);
     }
+    void fixNormal(const MyGeo::Vec3f& raydirection)
+    {
+        if(normal.v3.dot(raydirection)>0) normal.v3=-normal.v3;
+    }    
 
 };

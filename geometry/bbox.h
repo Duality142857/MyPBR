@@ -60,3 +60,4 @@ struct BBox
 };
 
 using BB3f=BBox<float,3>;
+using BB2f=BBox<float,2>;
