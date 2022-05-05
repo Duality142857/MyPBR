@@ -6,6 +6,8 @@
 #include"geometry/instance.h"
 #include"geometry/mesh.h"
 #include"geometry/camera.h"
+#include"geometry/aggregates.h"
+#include"color/spectrum.h"
 #include<mygeo/mat.h>
 #include<algorithm>
 
@@ -58,9 +60,28 @@ void test()
     // std::cout<<cam.genRay(400,400);
 }
 
+void boxTest()
+{
+    BB3f box{{0,0,0},{1,1,1}};
+    std::cout<<box;
+    MatrixTransform mt{rotationMat({0,0,1},45)};
+    std::cout<<mt(box);
+}
+
+
+
+
+void aggregateTest()
+{
+    auto primitive=std::make_shared<Primitive>(std::make_shared<Sphere>(5));
+    Instance instance{rotationMat({0,0,1},0),primitive};
+    std::cout<<instance.bound();
+    
+}
+
 int main(int argc, char** argv) 
 {
-    test();return 0;
+    aggregateTest();return 0;
     Point p{1,0,0};
     auto t=translateMat({1,1,1});
     auto q=t(p);

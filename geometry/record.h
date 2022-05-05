@@ -2,6 +2,9 @@
 #include<mygeo/vec.h>
 #include"space.h"
 #include"transforms.h"
+
+struct Primitive;
+
 struct HitRecord
 {
     float t;
@@ -9,6 +12,8 @@ struct HitRecord
     float tmax=std::numeric_limits<float>::max();
     Point position;
     Normal normal;
+    const Primitive* primitive=nullptr;
+    
     void transform(const MatrixTransform& transform)
     {
         position=transform(position);

@@ -14,10 +14,12 @@
 struct Shape : public Object
 {
     // const Transform *model, *model_inv;
-    virtual BB3f bound() const =0;
+    // virtual BB3f bound() const =0;
     // virtual BB3f worldBound() const;
     virtual float area() const =0;
     // virtual bool hit(const Ray& ray, HitRecord& rec) const =0;
+    // virtual bool hit(const Ray& ray, HitRecord& rec) const =0;
+
 };
 
 
@@ -32,7 +34,7 @@ struct Sphere: Shape
     
     bool hit(const Ray& ray, HitRecord& rec) const override
     {
-        if(!bound().hit(ray)) return false;
+        if(!bound().hitP(ray)) return false;
         MyGeo::Vec3f l=ray.source.v3;
         float a=ray.direction.v3.norm2();
         float b=2*ray.direction.v3.dot(l);

@@ -109,10 +109,17 @@ struct Vec
 		for (int i = 0; i != N; i++) sum += data[i] * v.data[i];
 		return sum;
 	}
-    Vec cwiseprod(const Vec& v)
+    Vec cwiseprod(const Vec& v) const
     {
         Vec res;
         for(int i=0;i!=N;i++) res.data[i]=data[i]*v.data[i];
+        return res;
+    }
+
+    Vec operator/(const Vec& v) const
+    {
+        Vec res;
+        for(int i=0;i!=N;++i) res.data[i]=data[i]/v.data[i];
         return res;
     }
     
@@ -301,10 +308,16 @@ struct Vec<T,2>
 		return sum;
 	}
 
-    Vec cwiseprod(const Vec& v)
+    Vec cwiseprod(const Vec& v) const 
     {
         Vec res;
         for(int i=0;i!=2;i++) res.data[i]=data[i]*v.data[i];
+        return res;
+    }
+    Vec operator/(const Vec& v) const
+    {
+        Vec res;
+        for(int i=0;i!=2;++i) res.data[i]=data[i]/v.data[i];
         return res;
     }
 	// Vec cross(const Vec& v) const
@@ -488,10 +501,16 @@ struct Vec<T,3>
 		for (int i = 0; i != 3; i++) sum += data[i] * v.data[i];
 		return sum;
 	}
-    Vec cwiseprod(const Vec& v)
+    Vec cwiseprod(const Vec& v) const 
     {
         Vec res;
         for(int i=0;i!=3;i++) res.data[i]=data[i]*v.data[i];
+        return res;
+    }
+    Vec operator/(const Vec& v) const
+    {
+        Vec res;
+        for(int i=0;i!=3;++i) res.data[i]=data[i]/v.data[i];
         return res;
     }
 	Vec cross(const Vec& v) const
@@ -600,7 +619,7 @@ struct Vec<T,3>
 
 //some inline helper functions
 
-//get the min components to form a new vec
+//get the min components of 2 vecs to form a new vec
 template<class T, int N>
 Vec<T,N> mixMin(const Vec<T,N>& a,const Vec<T,N>& b)
 {   
@@ -611,6 +630,7 @@ Vec<T,N> mixMin(const Vec<T,N>& a,const Vec<T,N>& b)
     }
     return v;
 }
+//get the max components of 2 vecs to form a new vec
 template<class T, int N>
 Vec<T,N> mixMax(const Vec<T,N>& a,const Vec<T,N>& b)
 {   
@@ -622,7 +642,30 @@ Vec<T,N> mixMax(const Vec<T,N>& a,const Vec<T,N>& b)
     return v;
 }
 
-
+//get the min components of a list of vecs to form a new vec
+template<class T, int N>
+Vec<T,N> mixMin(const std::initializer_list<Vec<T,N>>& vecs)
+{
+    assert(vecs.size()>1);
+    Vec<T,N> vmin{*vecs.begin()};
+    for(auto it=vecs.begin()+1;it!=vecs.end();++it)
+    {
+        vmin=mixMin(vmin,*it);
+    }
+    return vmin;
+}
+//get the max components of a list of vecs to form a new vec
+template<class T, int N>
+Vec<T,N> mixMax(const std::initializer_list<Vec<T,N>>& vecs)
+{
+    assert(vecs.size()>1);
+    Vec<T,N> vmax{*vecs.begin()};
+    for(auto it=vecs.begin()+1;it!=vecs.end();++it)
+    {
+        vmax=mixMax(vmax,*it);
+    }
+    return vmax;
+}
 
 
 

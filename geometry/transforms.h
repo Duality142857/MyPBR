@@ -2,6 +2,7 @@
 #include<mygeo/mat.h>
 #include"space.h"
 #include"utils.h"
+#include"bbox.h"
 
 struct Transform 
 {
@@ -59,6 +60,40 @@ struct MatrixTransform: public Transform
     {
         std::cout<<"transfrom ray"<<std::endl;
         return Ray{operator()(r.source),operator()(r.direction)};
+    }
+
+    virtual BB3f operator()(const BB3f& box) const 
+    {
+        const MatrixTransform& mt=*this;
+        const float& x0=box.min.x;
+        const float& x1=box.max.x;
+        const float& y0=box.min.y;
+        const float& y1=box.max.y;
+        const float& z0=box.min.z;
+        const float& z1=box.max.z;
+        
+
+        auto min=MyGeo::mixMin({
+            mt(Point{x0,y0,z0}).v3,
+            mt(Point{x0,y0,z1}).v3,
+            mt(Point{x0,y1,z0}).v3,
+            mt(Point{x0,y1,z1}).v3,
+            mt(Point{x1,y0,z0}).v3,
+            mt(Point{x1,y0,z1}).v3,           
+            mt(Point{x1,y1,z0}).v3,
+            mt(Point{x1,y1,z1}).v3
+        });
+        auto max=MyGeo::mixMax({
+            mt(Point{x0,y0,z0}).v3,
+            mt(Point{x0,y0,z1}).v3,
+            mt(Point{x0,y1,z0}).v3,
+            mt(Point{x0,y1,z1}).v3,
+            mt(Point{x1,y0,z0}).v3,
+            mt(Point{x1,y0,z1}).v3,           
+            mt(Point{x1,y1,z0}).v3,
+            mt(Point{x1,y1,z1}).v3
+        });
+        return BB3f{min,max};
     }
 
 
