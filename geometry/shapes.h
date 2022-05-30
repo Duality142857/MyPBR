@@ -1,10 +1,11 @@
 #pragma once
 #include"bbox.h"
 #include"ray.h"
-#include"record.h"
+#include"../core/record.h"
 #include"transforms.h"
 #include"utils.h"
-#include"object.h"
+#include"../core/object.h"
+#include"../core/myrandom.h"
 
 
 
@@ -19,18 +20,32 @@ struct Shape : public Object
     virtual float area() const =0;
     // virtual bool hit(const Ray& ray, HitRecord& rec) const =0;
     // virtual bool hit(const Ray& ray, HitRecord& rec) const =0;
+    virtual void sample(HitRecord& record) const =0;
 
 };
 
 
 
-struct Sphere: Shape
+struct Sphere: public Shape
 {
     const float radius,radius2;
 
     Sphere(float radius):radius{radius},radius2{radius*radius}{}
 
     float area() const override {return 4.f*Pi*radius*radius;}
+
+    virtual void sample(HitRecord& sampleRec) const override
+    {
+        float theta=getRand(0.f,Pi);   
+        float phi=getRand(0.f,2*Pi);
+        float z=radius*std::cosf(theta);
+        float g=radius*std::sinf(theta);
+        float x=g*std::cosf(phi);
+        float y=g*std::sinf(phi);
+        sampleRec.position={x,y,z};
+        sampleRec.normal={MyGeo::Vec3f{x,y,z}.normalize()};
+    }
+
     
     bool hit(const Ray& ray, HitRecord& rec) const override
     {
@@ -46,10 +61,13 @@ struct Sphere: Shape
 
         if(x2<=rec.tmin) return false;
         auto t=x1<rec.tmin?x2:x1;
-        if(t>rec.tmax) return false;
+        if(t>rec.t) return false;
 
         rec.t=t;
         rec.position=ray.at(t);
+        // std::cout<<"raw pos "<<rec.position<<std::endl;
+        rec.normal=Normal{rec.position.v3.normalVec()};
+        // std::cout<<"hit sphere!"<<std::endl;
         return true;
     }
     virtual BB3f bound() const override

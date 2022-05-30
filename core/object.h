@@ -1,5 +1,5 @@
 #pragma once
-#include"ray.h"
+#include"../geometry/ray.h"
 #include"record.h"
 struct Object
 {

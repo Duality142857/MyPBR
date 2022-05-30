@@ -205,13 +205,13 @@ struct Vec
 
     T norm() const {return sqrt(norm2());}
 
-    Vec& normalize()
+    Vec normalize()
     {
         T k=1/norm();
         for(T& x:data) x*=k;
         return *this; 
     }
-    Vec normalize() const 
+    Vec normalVec() const 
     {
         T k=1/norm();
         Vec res;
@@ -403,13 +403,13 @@ struct Vec<T,2>
     T norm() const
     {return sqrt(norm2());}
 
-    Vec& normalize()
+    Vec normalize()
     {
         T k=1/norm();
         for(T& x:data) x*=k;
         return *this; 
     }
-    Vec normalize() const 
+    Vec normalVec() const 
     {
         T k=1/norm();
         Vec res;
@@ -600,7 +600,7 @@ struct Vec<T,3>
         for(T& x:data) x*=k;
         return *this; 
     }
-    Vec normalize() const 
+    Vec normalVec() const 
     {
         T k=1/norm();
         Vec res;

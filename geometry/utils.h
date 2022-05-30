@@ -20,7 +20,7 @@ static std::optional<std::tuple<float,float>> solveQuadratic(const float& a, con
     return std::make_optional(std::make_tuple(x1,x2));
 }
 template <typename T, typename U, typename V>
-inline T clamp(T val, U low, V high) 
+inline T clamp(T low, U high, V val) 
 {
     if (val < low)
         return low;

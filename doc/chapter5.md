@@ -24,3 +24,5 @@ XYZ表示人眼感知顏色很合適，但是不適合作爲spectral computation
 ### 5.2.2 RGB Color
 不同顯示設備的spectral response curve不同，分爲紅綠藍三個獨立的曲線，和SPD相乘後積分。
 rgb和xyz相互轉換通過矩陣乘法。每個矩陣元爲一個分量積分$\int R(\lambda)X(\lambda)d\lambda$
+
+

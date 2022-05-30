@@ -42,6 +42,7 @@ struct MatrixTransform: public Transform
         Point res{m*p.v4};
         float reciw=1.f/res.w;
         res.v3*=reciw;
+        res.w=1.f;
         return res;
     }
 
@@ -58,7 +59,7 @@ struct MatrixTransform: public Transform
 
     virtual Ray operator()(const Ray& r) const
     {
-        std::cout<<"transfrom ray"<<std::endl;
+        // std::cout<<"transfrom ray"<<std::endl;
         return Ray{operator()(r.source),operator()(r.direction)};
     }
 
@@ -97,7 +98,7 @@ struct MatrixTransform: public Transform
     }
 
 
-    MatrixTransform operator*(const MatrixTransform& other)
+    MatrixTransform operator*(const MatrixTransform& other) const
     {
         return {m*other.m};
     }
@@ -113,11 +114,16 @@ static MatrixTransform scaleMat(const MyGeo::Vec3f& k)
     return {MyGeo::Mat4f{MyGeo::Vec4f{k[0],0,0,0},{0,k[1],0,0},{0,0,k[2],0},{0,0,0,1}}};
 }
 
+static MatrixTransform identityMat()
+{
+    return {MyGeo::Mat4f{MyGeo::Vec4f{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}};
+}
+
 static MatrixTransform rotationMat(const MyGeo::Vec3f& axis, float angle)
 {
     MyGeo::Vec3f nAxis=axis;
     nAxis.normalize();
-    // std::cout<<nAxis<<std::endl;
+    std::cout<<nAxis<<std::endl;
     float C=std::cos(toRad(angle));
     float R=1-C;
     float S=std::sin(toRad(angle));

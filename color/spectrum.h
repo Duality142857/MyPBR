@@ -9,12 +9,14 @@ enum class SpectrumType { Reflectance, Illuminant };
 static const int sampledLambdaStart = 400;
 static const int sampledLambdaEnd = 700;
 static const int nSpectrumSamples = 60;
-static float interpolateSpectrumSamples(const float *lambda, const float *vals, int n,
-                                 float l) {
-    if (l <= lambda[0]) return vals[0];
-    if (l >= lambda[n - 1]) return vals[n - 1];
-    int offset = findInterval(n, [&](int index) { return lambda[index] <= l; });
-    float t = (l - lambda[offset]) / (lambda[offset + 1] - lambda[offset]);
+
+static float interpolateSpectrumSamples
+(const float *lambda, const float *vals, int n, float k) 
+{
+    if (k <= lambda[0]) return vals[0];
+    if (k >= lambda[n - 1]) return vals[n - 1];
+    int offset = findInterval(n, [&](int index) { return lambda[index] <= k; });\
+    float t = (k - lambda[offset]) / (lambda[offset + 1] - lambda[offset]);
     return lerp(t, vals[offset], vals[offset + 1]);
 }
 inline void XYZToRGB(const float xyz[3], float rgb[3]) 
@@ -51,7 +53,7 @@ void SortSpectrumSamples(float *lambda, float *vals, int n)
         vals[i] = sortVec[i].second;
     }
 }
-float AverageSpectrumSamples(const float *lambda, const float *vals, int n, float lambdaStart,float lambdaEnd) 
+float averageSpectrumSamples(const float *lambda, const float *vals, int n, float lambdaStart,float lambdaEnd) 
 {
     // Handle cases with out-of-bounds range or single sample only
     if (lambdaEnd <= lambda[0]) return vals[0];
@@ -123,7 +125,7 @@ struct SampledSpectrum: public CoefficientSpectrum<nSpectrumSamples>
             float lambda0=lerp((float)i/nSpectrumSamples,sampledLambdaStart,sampledLambdaEnd);
             float lambda1=lerp((float)(i+1)/nSpectrumSamples,sampledLambdaStart,sampledLambdaEnd);
             
-            r.color[i]=AverageSpectrumSamples(lambda,v,n,lambda0,lambda1);
+            r.color[i]=averageSpectrumSamples(lambda,v,n,lambda0,lambda1);
 
         }
         return r;
@@ -135,11 +137,11 @@ struct SampledSpectrum: public CoefficientSpectrum<nSpectrumSamples>
         {
             float wl0=lerp((float)i/float(nSpectrumSamples),sampledLambdaStart,sampledLambdaEnd);
             float wl1=lerp((float)(i+1)/float(nSpectrumSamples),sampledLambdaStart,sampledLambdaEnd);
-            X.color[i] = AverageSpectrumSamples(CIE_lambda, CIE_X, nCIESamples,
+            X.color[i] = averageSpectrumSamples(CIE_lambda, CIE_X, nCIESamples,
                                             wl0, wl1);
-            Y.color[i] = AverageSpectrumSamples(CIE_lambda, CIE_Y, nCIESamples,
+            Y.color[i] = averageSpectrumSamples(CIE_lambda, CIE_Y, nCIESamples,
                                             wl0, wl1);
-            Z.color[i] = AverageSpectrumSamples(CIE_lambda, CIE_Z, nCIESamples,
+            Z.color[i] = averageSpectrumSamples(CIE_lambda, CIE_Z, nCIESamples,
                                             wl0, wl1);
         }
     }
@@ -192,21 +194,22 @@ struct RGBSpectrum: public CoefficientSpectrum<3>
         s.color[2]=rgb[2];
         return s;
     }
-    void toRGB(float* rgb) const 
-    {
-        rgb[0]=color[0];
-        rgb[1]=color[1];
-        rgb[2]=color[2];
-    }
-    const RGBSpectrum &toRGBSpectrum() const 
-    {
-        return *this;
-    }
+    // void toRGB(float* rgb) const 
+    // {
+    //     rgb[0]=color[0];
+    //     rgb[1]=color[1];
+    //     rgb[2]=color[2];
+    // }
+    // const RGBSpectrum &toRGBSpectrum() const 
+    // {
+    //     return *this;
+    // }
     void toXYZ(float xyz[3]) const 
     { 
         RGBToXYZ(color.data.data(), xyz);
     }
-    static RGBSpectrum FromXYZ(const float xyz[3], SpectrumType type=SpectrumType::Reflectance) 
+
+    static RGBSpectrum fromXYZ(const float xyz[3], SpectrumType type=SpectrumType::Reflectance) 
     {
         RGBSpectrum r;
         XYZToRGB(xyz, r.color.data.data());
@@ -218,10 +221,18 @@ struct RGBSpectrum: public CoefficientSpectrum<3>
         return YWeight[0] * color[0] + YWeight[1] * color[1] + YWeight[2] * color[2];
     }
     static RGBSpectrum FromSampled(const float *lambda, const float *v,
-                                    int n) {
-        // <<Sort samples if unordered, use sorted for returned spectrum>> 
+                                    int n)
+    {
+       if (!SpectrumSamplesSorted(lambda, v, n)) 
+       {
+           std::vector<float> slambda(&lambda[0], &lambda[n]);
+           std::vector<float> sv(&v[0], &v[n]);
+           SortSpectrumSamples(&slambda[0], &sv[0], n);
+           return FromSampled(&slambda[0], &sv[0], n);
+       }
         float xyz[3] = { 0, 0, 0 };
-        for (int i = 0; i < nCIESamples; ++i) {
+        for (int i = 0; i < nCIESamples; ++i) 
+        {
             float val = interpolateSpectrumSamples(lambda, v, n,
                                                     CIE_lambda[i]);
             xyz[0] += val * CIE_X[i];
@@ -233,6 +244,6 @@ struct RGBSpectrum: public CoefficientSpectrum<3>
         xyz[0] *= scale;
         xyz[1] *= scale;
         xyz[2] *= scale;
-        return FromXYZ(xyz);    
+        return fromXYZ(xyz);    
     }
 };

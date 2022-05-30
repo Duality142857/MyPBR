@@ -15,6 +15,7 @@ struct Ray
     {
         return ostr<<ray.source.v3<<" -> "<<ray.direction.v3<<std::endl;
     }
+    
 
     Point at(float t) const 
     {
