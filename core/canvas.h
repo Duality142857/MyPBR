@@ -107,7 +107,7 @@ float lightArea=0;
     MyGeo::Vec3f shade(const std::vector<std::shared_ptr<Instance>>& instances,const std::vector<std::shared_ptr<Instance>>& lights, const MyGeo::Vec3f& wo, HitRecord& rec,int depth)
     {
         //Sample light
-        if(depth>64) return {0,0,0};
+        if(depth>32) return {0,0,0};
         HitRecord sampleRec;
         sampleLight(lights,sampleRec);
         HitRecord checkrec;
@@ -134,9 +134,9 @@ float lightArea=0;
 
 
         static const float rus=0.8;
-        if(getRand(0.01f,0.99f)>rus) return L_direct;
+        if(getRand(0.f,1.f)>rus) return L_direct;
 
-        // rec.fixNormal(-wo);
+        rec.fixNormal(-wo);
 
         auto wi=randomInHemisphere(rec.normal.v3);
         assert(wi.dot(rec.normal.v3)>=0);

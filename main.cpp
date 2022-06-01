@@ -138,12 +138,12 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
 
 
 
-    auto wallLeft=genShared<Shape,Rect>(Point{555,0,0},Vect{0,0,555},Vect{0,555,0});
+    auto wallLeft=genShared<Shape,Rect>(Point{600,0,0},Vect{0,0,555},Vect{0,555,0});
     auto wallRight=genShared<Shape,Rect>(Point{0,0,555},Vect{0,0,-555},Vect{0,555,0});
-    auto ceil=genShared<Shape,Rect>(Point{555,555,555},Vect{-555,0,0},Vect{0,0,-555});
-    auto floor=genShared<Shape,Rect>(Point{555,0,0},Vect{-555,0,0},Vect{0,0,555});
-    auto wallMiddle=genShared<Shape,Rect>(Point{555,0,555},Vect{-555,0,0},Vect{0,555,0});
-    auto ceilLight=genShared<Shape,Rect>(Point{325.5,554,325.5},Vect{-100,0,0},Vect{0,0,-100});
+    auto ceil=genShared<Shape,Rect>(Point{600,555,555},Vect{-600,0,0},Vect{0,0,-555});
+    auto floor=genShared<Shape,Rect>(Point{600,0,0},Vect{-600,0,0},Vect{0,0,555});
+    auto wallMiddle=genShared<Shape,Rect>(Point{600,0,555},Vect{-600,0,0},Vect{0,555,0});
+    auto ceilLight=genShared<Shape,Rect>(Point{360,554.8,325.5},Vect{-120,0,0},Vect{0,0,-100});
 
     
 
@@ -162,7 +162,7 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
     auto wallRight_red=genShared<Primitive,Primitive>(wallRight,lambertian_red);
     auto ceil_white=genShared<Primitive,Primitive>(ceil,lambertian_white);
     auto floor_white=genShared<Primitive,Primitive>(floor,lambertian_white);
-    auto wallMiddle_white=genShared<Primitive,Primitive>(wallMiddle,lambertian_white);
+    auto wallMiddle_white=genShared<Primitive,Primitive>(wallMiddle,lambertian_yellow);
     auto ceilLight_white=genShared<Primitive,Primitive>(ceilLight,monolight_white);
 
 
@@ -177,7 +177,7 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
 
     auto ball=genShared<Shape,Sphere>(80);
     auto ball_white=genShared<Primitive,Primitive>(ball,lambertian_white);
-    auto ball_white_instance1=genShared<Instance,Instance>(translateMat({120,180,300})*rotationMat({1,1,1},-40)*scaleMat({1,1.8,1}),ball_white);
+    auto ball_white_instance1=genShared<Instance,Instance>(translateMat({150,145,300})*scaleMat({1.2,1.8,1.2}),ball_white);
     auto ball_white_instance2=genShared<Instance,Instance>(translateMat({300,200,300})*rotationMat({1,1,1},-90)*scaleMat({1.5,0.2,1}),ball_white);
 
 
@@ -192,9 +192,9 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
     instances.emplace_back(floor_white_instance);
     instances.emplace_back(wallMiddle_white_instance);
     instances.emplace_back(ceilLight_white_instance);
-    instances.emplace_back(samllBox_white_instance);
+    // instances.emplace_back(samllBox_white_instance);
     instances.emplace_back(bigBox_white_instance);
-    // instances.emplace_back(ball_white_instance1);
+    instances.emplace_back(ball_white_instance1);
     // instances.emplace_back(ball_white_instance2);
 
 
@@ -204,11 +204,11 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
         if(p->primitive->material->ifemit()) lightInstances.push_back(p);
     }
 
-    Canvas canvas{800,800};
+    Canvas canvas{1280,800};
 
     auto camera=std::make_shared<PerspectiveCamera>(Point{278,278,-800},Point{278,278,0},Vect{0,1,0},45,(float)canvas.width/canvas.height,Film{MyGeo::Vec2i{canvas.width,canvas.height}},0.f,10.f);
     canvas.setCamera(camera);
-    canvas.render(instances,lightInstances,16,16);
+    canvas.render(instances,lightInstances,1024,16);
 }
 
 int main(int argc, char** argv) 
