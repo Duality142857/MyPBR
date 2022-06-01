@@ -15,9 +15,7 @@ struct Primitive : Object
     virtual bool hit(const Ray& ray,HitRecord& rec) const override
     {
         if(!shape->hit(ray,rec)) return false;
-        // std::cout<<"poss "<<rec.position;
         rec.material=material;
-        // rec.primitive=this;
         return true;
     }
 

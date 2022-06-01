@@ -116,7 +116,8 @@ struct PerspectiveCamera : public Camera
     Ray genRay(float x, float y) const override
     {
         // std::cout<<"asdf "<<cam2scr(Point{-1,1,-100}).v3<<std::endl;
-        Point rstPoint{x,y,0.f};
+        Point rstPoint{x+getRand(0.f,1.f),y+getRand(0.f,1.f),0.f};
+        
         // std::cout<<"camPoint: "<<(scr2cam*rst2scr)(rstPoint)<<std::endl;
         return Ray{position,cam2world(Vect{(scr2cam*rst2scr)(rstPoint).v3}).normalize()} ;
         // return Ray{position,(cam2world*scr2cam*rst2scr)(rstPoint).v3.normalize()} ;

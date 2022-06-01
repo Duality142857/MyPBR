@@ -24,6 +24,11 @@ struct Vect
         
     };
 
+    friend Vect operator*(float k,const Vect& v)
+    {
+        return {k*v.v3};
+    }
+
     Vect operator-() const 
     {
         return Vect{-v3};

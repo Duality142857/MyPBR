@@ -116,6 +116,11 @@ struct Vec
         return res;
     }
 
+    friend Vec operator*(const Vec& v1,const Vec& v2) 
+    {
+        return v1.cwiseprod(v2);
+    }
+
     Vec operator/(const Vec& v) const
     {
         Vec res;
@@ -314,6 +319,10 @@ struct Vec<T,2>
         for(int i=0;i!=2;i++) res.data[i]=data[i]*v.data[i];
         return res;
     }
+    friend Vec operator*(const Vec& v1,const Vec& v2) 
+    {
+        return v1.cwiseprod(v2);
+    }
     Vec operator/(const Vec& v) const
     {
         Vec res;
@@ -506,6 +515,10 @@ struct Vec<T,3>
         Vec res;
         for(int i=0;i!=3;i++) res.data[i]=data[i]*v.data[i];
         return res;
+    }
+    friend Vec operator*(const Vec& v1,const Vec& v2) 
+    {
+        return v1.cwiseprod(v2);
     }
     Vec operator/(const Vec& v) const
     {

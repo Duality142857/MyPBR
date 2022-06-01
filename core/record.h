@@ -9,11 +9,12 @@ struct Primitive;
 struct HitRecord
 {
     // float t;
-    float tmin=0.f;
+    float tmin=0.001f;
     float t=std::numeric_limits<float>::max();
     float u,v;
     Point position;
     Normal normal;
+    float area;//for pdf
     // const Primitive* primitive=nullptr;
     std::shared_ptr<Material> material;
     // HitRecord(){}

@@ -93,6 +93,7 @@ struct Triangle: public Shape
         float gamma=1.f-alpha-beta;
         rec.position=mesh.positions[indices[0]].v3*alpha+mesh.positions[indices[1]].v3*beta+mesh.positions[indices[2]].v3*gamma;
         rec.normal=normal;
+        rec.area=area();
     }
 
     virtual float area() const override
@@ -126,6 +127,7 @@ struct Triangle: public Shape
             rec.t=t;
             rec.position=ray.at(t);
             rec.normal=normal;
+            // rec.fixNormal(ray.direction.v3);
             // std::cout<<"hit!"<<std::endl;
             return true;
         }
@@ -150,16 +152,20 @@ struct Rect: TriangleMesh
 {
     std::vector<Triangle> trianglesVec;
     float areaVal=0;
-    Rect(const Point& r0, const Vect& right, const Vect& up):areaVal{right.cross(up).v3.norm()}
+    Normal normal;
+    Point r0;
+    Vect right;
+    Vect up;
+    Rect(const Point& r0, const Vect& right, const Vect& up):r0{r0},right{right},up{up},areaVal{right.cross(up).v3.norm()},normal{{right.cross(up).v3.normalize()}}
     {
         int ind=0;
-        auto n=Normal{right.cross(up).normalize().v3};
+        // auto n=Normal{right.cross(up).normalize().v3};
         positions.emplace_back(r0);
         positions.emplace_back(r0+right);        
         positions.emplace_back(r0+up+right);
         positions.emplace_back(r0+up);
 
-        vecAppend(normals,{n,n,n,n});
+        vecAppend(normals,{normal,normal,normal,normal});
         vecAppend(indices,{0,1,2});
         vecAppend(indices,{0,2,3});
         for(int i=0;i!=indices.size();i+=3)
@@ -195,7 +201,11 @@ struct Rect: TriangleMesh
     }
     void sample(HitRecord& rec) const override
     {
-        
+        float kx= getRand(0.f,1.f);
+        float ky=getRand(0.f,1.f);
+        rec.position=r0+kx*right+ky*up;
+        rec.normal=normal;
+        rec.area=area();
     }
 };
 
@@ -207,6 +217,8 @@ struct Cube: TriangleMesh
 
     virtual bool hit(const Ray& ray, HitRecord& rec) const override
     {
+        if(!bound().hitP(ray)) return false;
+
         bool hitflag=false;
         for(auto const& triangle:trianglesVec)
         {
@@ -233,7 +245,7 @@ struct Cube: TriangleMesh
         
     }
 
-    Cube(MyGeo::Vec3f scale):scale{scale}
+    Cube(const MyGeo::Vec3f& _scale):scale{0.5*_scale}
     {
         int curstart=0;
         //x=-1,1 faces

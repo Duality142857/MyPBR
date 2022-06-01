@@ -10,6 +10,7 @@ struct Instance: public Object
     MatrixTransform transform_inv;
     virtual float area() const 
     {
+        //todo,not right under some transformation
         return primitive->shape->area();
     }
     virtual BB3f bound() const override
@@ -24,7 +25,7 @@ struct Instance: public Object
     {
         primitive->sample(sampleRec);
         sampleRec.transform(transform);
-        std::cout<<sampleRec;
+        // std::cout<<sampleRec;
     }
 
     virtual bool hit(const Ray& ray, HitRecord& rec) const override

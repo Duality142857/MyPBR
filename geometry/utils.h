@@ -2,6 +2,7 @@
 #include<optional>
 
 static constexpr float Pi=3.14159265f;
+static constexpr float ReciPi=1.f/Pi;
 
 static constexpr float toRad(float x)
 {

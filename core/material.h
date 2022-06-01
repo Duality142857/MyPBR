@@ -5,7 +5,10 @@ struct Material
 {
     virtual MyGeo::Vec3f getColor(float u,float v) const =0;     
     // virtual MyGeo::Vec3f emitColor(float u,float v) const =0;
- 
+    virtual MyGeo::Vec3f brdf(const MyGeo::Vec3f& lo, const MyGeo::Vec3f& li) const
+    {
+        return {0,0,0};
+    }
     virtual bool ifemit() const 
     {
         return false;
@@ -18,6 +21,7 @@ struct Light : public Material
     {
         return true;
     }
+    // virtual float reciPDF() const =0;
 };
 
 struct MonoLight : public Light
@@ -28,6 +32,10 @@ struct MonoLight : public Light
     {
         return color;
     }    
+    // virtual float reciPDF() const override
+    // {
+    //     return 1
+    // }
 
 };
 
@@ -35,7 +43,15 @@ struct MonoLight : public Light
 struct Lambertian : public Material
 {
     MyGeo::Vec3f color;
-    Lambertian(const MyGeo::Vec3f& color):color{color}{}
+    MyGeo::Vec3f albedo;
+    MyGeo::Vec3f brdf(const MyGeo::Vec3f& lo, const MyGeo::Vec3f& li) const override
+    {
+        return color*ReciPi;
+    }
+    Lambertian(const MyGeo::Vec3f& color):color{color},albedo{0.8,0.8,0.8}{}
+    Lambertian(const MyGeo::Vec3f& color, const MyGeo::Vec3f& albedo):color{color},albedo{albedo}{}
+    // float pdf()
+
     // virtual bool ifemit() const override 
     // {
     //     return false;
