@@ -9,7 +9,7 @@ struct Primitive;
 struct HitRecord
 {
     // float t;
-    float tmin=0.001f;
+    float tmin=0.3f;
     float t=std::numeric_limits<float>::max();
     float u,v;
     Point position;

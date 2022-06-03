@@ -56,3 +56,38 @@ int findInterval(int size, const Predicate &pred)
     
     return clamp(first - 1, 0, size - 2);
 }
+
+static inline MyGeo::Vec3f reflect(const MyGeo::Vec3f& l, const MyGeo::Vec3f& n)
+{
+    return n*l.dot(n)*2.f-l;
+}
+
+static MyGeo::Vec3f refract(const MyGeo::Vec3f& l, const MyGeo::Vec3f& N, const float& ior1,const float& ior2)
+{
+    auto n=N;
+    float cos=l.dot(n);
+    float etai=ior1,etat=ior2;
+    if(cos<0) cos=-cos;
+    else {std::swap(etai,etat);n=-n;}
+    float eta=etai/etat;
+    float k=1-eta*eta*(1-cos*cos);
+    return k<0?MyGeo::Vec3f{0,0,0}:l*eta+n*(eta*cos-sqrtf(k));
+}
+
+static float fresnel(const MyGeo::Vec3f& l, const MyGeo::Vec3f& N,const float& ior1,const float& ior2)
+{
+    float cosi=l.dot(N);
+    float etai=ior1,etat=ior2;
+    if(cosi>0)
+    {
+        std::swap(etai,etat);
+    }
+    float sint=etai/etat*sqrtf(std::max(0.f,1-cosi*cosi));
+
+    if(sint>=1) return 1.0f;
+    float cost=sqrtf(std::max(0.f,1-sint*sint));
+    cosi=fabsf(cosi);
+    float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+    float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+    return (Rs * Rs + Rp * Rp) / 2;
+}

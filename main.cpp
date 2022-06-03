@@ -17,76 +17,6 @@
 #include<algorithm>
 #include"implement/mesh.inpl"
 
-// struct vec3
-// {
-//     std::array<float,3> data;
-// };
-
-// struct mat3
-// {
-//     std::array<vec3,3> columns;
-// };
-// mat3 m{vec3{1,2,3},vec3{4,5,6},vec3{7,8,9}};
-
-        // float fov,
-        // const MatrixTransform& cam2world, 
-        // const MatrixTransform& cam2scr,
-        // const BB2f& screen,
-        // Film& film,
-        // float lensRadius,
-        // float focalDistance
-void test()
-{
-    MyGeo::Mat4f m{
-        MyGeo::Vec4f{1,0,0,0},
-        {1,0,1,0},
-        {0,1,1,0},
-        {1,0,0,2}
-    };
-    // std::cout<<m;
-    // std::cout<<"det: "<<m.determinant()<<std::endl;
-    // std::cout<<MyGeo::invMat(m)*m<<std::endl;
-    // std::cout<<AR(m,0,0)<<std::endl;
-
-    // std::cout<<std::max({1.f,2.f,3.f})<<std::endl;
-        // Point position,
-        // Point lookat,
-        // Vect up,
-        // float fov,
-        // float aspectRatio,
-        // // const MatrixTransform& cam2world, 
-        // // const MatrixTransform& cam2scr,
-        // const BB2f& screen,
-        // const Film& film,
-        // float lensRadius,
-        // float focalDistance
-    PerspectiveCamera cam{Point{0,0,-1},Point{0,0,0},Vect{0,1,0},45,1.f,Film{MyGeo::Vec2i{800,800}},0.f,1.f};
-    std::cout<<cam.genRay(800,800);
-//     std::cout<<"next ray"<<std::endl;
-    // std::cout<<cam.genRay(400,400);
-}
-
-void boxTest()
-{
-    BB3f box{{0,0,0},{1,1,1}};
-    std::cout<<box;
-    MatrixTransform mt{rotationMat({0,0,1},45)};
-    std::cout<<mt(box);
-}
-
-
-
-
-void aggregateTest()
-{
-    std::shared_ptr<Material> lam=std::make_shared<Lambertian>(MyGeo::Vec3f{1,1,1});
-    std::shared_ptr<Shape> sphere= std::make_shared<Sphere>(200);
-    auto primitive=std::make_shared<Primitive>(sphere, lam);
-    Instance instance{rotationMat({0,0,1},0),primitive};
-    std::cout<<instance.bound();
-}
-
-
 
 static std::shared_ptr<Material> genLambertian(const MyGeo::Vec3f& color)
 {
@@ -122,6 +52,11 @@ void renderTest()
     auto lambertian_blue=genShared<Material,Lambertian>(MyGeo::Vec3f{0,0,1});
     auto lambertian_yellow=genShared<Material,Lambertian>(MyGeo::Vec3f{1,1,0});
 
+    auto mirror=genShared<Material,Mirror>(MyGeo::Vec3f{1,1,1});
+    auto dielectric=genShared<Material,Dielectric>(1.6f);
+
+
+
 
 auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6f *  MyGeo::Vec3f{0.740f+0.287f,0.740f+0.160f,0.740f} + 18.4f * MyGeo::Vec3f{0.737f+0.642f,0.737f+0.159f,0.737f};
 
@@ -148,13 +83,17 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
     
 
 
-    auto smallBox=genShared<Shape,Cube>(MyGeo::Vec3f{165,165,165});
-    auto smallBox_white=genShared<Primitive,Primitive>(smallBox,lambertian_white);
-    auto samllBox_white_instance=genShared<Instance,Instance>(translateMat({212.5,82.5,147.5})*rotationMat({0,1,0},-18),smallBox_white);
+    // auto smallBox=genShared<Shape,Cube>(MyGeo::Vec3f{165,165,165});
+    auto smallBox=genShared<Shape,Cube>(MyGeo::Vec3f{125,125,125});
 
-    auto bigBox=genShared<Shape,Cube>(MyGeo::Vec3f{165,330,165});
-    auto bigBox_white=genShared<Primitive,Primitive>(bigBox,lambertian_white);
-    auto bigBox_white_instance=genShared<Instance,Instance>(translateMat({347.5,165,377.5})*rotationMat({0,1,0},15),bigBox_white);
+    auto smallBox_white=genShared<Primitive,Primitive>(smallBox,dielectric);
+    // auto samllBox_white_instance=genShared<Instance,Instance>(translateMat({212.5,82.5,147.5})*rotationMat({0,1,0},-18),smallBox_white);
+    auto samllBox_white_instance=genShared<Instance,Instance>(translateMat({300,62.5,80})*rotationMat({0,1,0},-28),smallBox_white);
+
+
+    auto bigBox=genShared<Shape,Cube>(MyGeo::Vec3f{240,380,200});
+    auto bigBox_mirror=genShared<Primitive,Primitive>(bigBox,mirror);
+    auto bigBox_mirror_instance=genShared<Instance,Instance>(translateMat({380.5,165,377.5})*rotationMat({0,1,0},25),bigBox_mirror);
 
     auto wallLeft_green=genShared<Primitive,Primitive>(wallLeft,lambertian_green);
     auto wallLeft_white=genShared<Primitive,Primitive>(wallLeft,lambertian_white);
@@ -162,7 +101,7 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
     auto wallRight_red=genShared<Primitive,Primitive>(wallRight,lambertian_red);
     auto ceil_white=genShared<Primitive,Primitive>(ceil,lambertian_white);
     auto floor_white=genShared<Primitive,Primitive>(floor,lambertian_white);
-    auto wallMiddle_white=genShared<Primitive,Primitive>(wallMiddle,lambertian_yellow);
+    auto wallMiddle_white=genShared<Primitive,Primitive>(wallMiddle,lambertian_white);
     auto ceilLight_white=genShared<Primitive,Primitive>(ceilLight,monolight_white);
 
 
@@ -175,9 +114,11 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
     auto wallMiddle_white_instance=genShared<Instance,Instance>(identityMat(),wallMiddle_white);
     auto ceilLight_white_instance=genShared<Instance,Instance>(identityMat(),ceilLight_white);
 
-    auto ball=genShared<Shape,Sphere>(80);
+    auto ball=genShared<Shape,Sphere>(100);
     auto ball_white=genShared<Primitive,Primitive>(ball,lambertian_white);
-    auto ball_white_instance1=genShared<Instance,Instance>(translateMat({150,145,300})*scaleMat({1.2,1.8,1.2}),ball_white);
+    // auto ball_white=genShared<Primitive,Primitive>(ball,lambertian_white);
+
+    auto ball_white_instance1=genShared<Instance,Instance>(translateMat({170,140,300})*scaleMat({0.8,1.4,0.5}),ball_white);
     auto ball_white_instance2=genShared<Instance,Instance>(translateMat({300,200,300})*rotationMat({1,1,1},-90)*scaleMat({1.5,0.2,1}),ball_white);
 
 
@@ -192,8 +133,8 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
     instances.emplace_back(floor_white_instance);
     instances.emplace_back(wallMiddle_white_instance);
     instances.emplace_back(ceilLight_white_instance);
-    // instances.emplace_back(samllBox_white_instance);
-    instances.emplace_back(bigBox_white_instance);
+    instances.emplace_back(samllBox_white_instance);
+    instances.emplace_back(bigBox_mirror_instance);
     instances.emplace_back(ball_white_instance1);
     // instances.emplace_back(ball_white_instance2);
 
@@ -204,11 +145,11 @@ auto lightColor=8.0f * MyGeo::Vec3f{0.747f+0.058f, 0.747f+0.258f, 0.747f} + 15.6
         if(p->primitive->material->ifemit()) lightInstances.push_back(p);
     }
 
-    Canvas canvas{1280,800};
+    Canvas canvas{800,800};
 
     auto camera=std::make_shared<PerspectiveCamera>(Point{278,278,-800},Point{278,278,0},Vect{0,1,0},45,(float)canvas.width/canvas.height,Film{MyGeo::Vec2i{canvas.width,canvas.height}},0.f,10.f);
     canvas.setCamera(camera);
-    canvas.render(instances,lightInstances,1024,16);
+    canvas.render(instances,lightInstances,512,16);
 }
 
 int main(int argc, char** argv) 

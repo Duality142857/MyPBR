@@ -55,6 +55,7 @@ struct MatrixTransform: public Transform
     virtual Normal operator()(const Normal& v) const
     {
         return {m.inverse().transpose()*v.v4};
+        // return m*v.v4;
     }
 
     virtual Ray operator()(const Ray& r) const
